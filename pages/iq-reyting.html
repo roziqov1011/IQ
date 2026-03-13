@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reyting — NeuroIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060508;
+    --bg2: #0a0810;
+    --surface: #100e18;
+    --surface2: #15121f;
+    --border: rgba(246,230,94,0.1);
+    --border2: rgba(246,230,94,0.05);
+    --accent: #f6e05e;
+    --accent-dim: rgba(246,230,94,0.15);
+    --silver: #cbd5e0;
+    --bronze: #ed8936;
+    --green: #68d391;
+    --blue: #63b3ed;
+    --purple: #b794f4;
+    --red: #fc8181;
+    --text: #e2e8f0;
+    --muted: #718096;
+    --muted2: #4a5568;
+    --glow-gold: rgba(246,230,94,0.2);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    font-family:'Syne',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+    cursor:none;
+    min-height:100vh;
+  }
+
+  /* Cursor */
+  .cursor { width:8px;height:8px;background:var(--accent);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transition:transform 0.1s;mix-blend-mode:screen; }
+  .cursor-ring { width:36px;height:36px;border:1px solid rgba(246,230,94,0.4);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:all 0.18s ease; }
+
+  /* BG */
+  body::before {
+    content:'';position:fixed;inset:0;
+    background-image:linear-gradient(rgba(246,230,94,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(246,230,94,0.02) 1px,transparent 1px);
+    background-size:60px 60px;pointer-events:none;z-index:0;
+  }
+  /* Diagonal scanlines overlay */
+  body::after {
+    content:'';position:fixed;inset:0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+    pointer-events:none;z-index:0;opacity:0.5;
+  }
+
+  .blob { position:fixed;border-radius:50%;filter:blur(140px);pointer-events:none;z-index:0;animation:bfloat 14s ease-in-out infinite; }
+  .blob-1 { width:600px;height:600px;background:rgba(246,230,94,0.05);top:-150px;left:-100px; }
+  .blob-2 { width:400px;height:400px;background:rgba(237,137,54,0.04);bottom:0;right:-80px;animation-delay:-7s; }
+  .blob-3 { width:300px;height:300px;background:rgba(99,179,237,0.03);top:50%;left:50%;animation-delay:-3.5s; }
+  @keyframes bfloat { 0%,100%{transform:translate(0,0);}50%{transform:translate(20px,-25px);} }
+
+  /* NAV */
+  nav { position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:20px 60px;background:rgba(6,5,8,0.8);backdrop-filter:blur(24px);border-bottom:1px solid var(--border); }
+  .logo { display:flex;align-items:center;gap:10px;font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;text-decoration:none;color:var(--text); }
+  .logo-icon { width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--bg); }
+  .logo span { color:var(--accent); }
+  .nav-links { display:flex;gap:36px;list-style:none; }
+  .nav-links a { color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;transition:color 0.2s; }
+  .nav-links a:hover { color:var(--text); }
+  .nav-links a.active { color:var(--accent); }
+  .nav-avatar { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--bronze));display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--bg);cursor:pointer; }
+
+  /* PAGE HEADER */
+  .page-header {
+    position:relative;z-index:1;
+    padding:140px 60px 60px;
+    display:flex;align-items:flex-end;justify-content:space-between;
+  }
+  .breadcrumb { font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted2);letter-spacing:0.08em;margin-bottom:20px; }
+  .breadcrumb span { color:var(--accent); }
+  .page-title { font-size:clamp(2.8rem,6vw,6rem);font-weight:800;letter-spacing:-0.04em;line-height:0.95;margin-bottom:16px;animation:fadeUp 0.7s ease both; }
+  .page-title em { font-style:normal;color:var(--accent); }
+  .page-sub { color:var(--muted);font-size:0.95rem;line-height:1.7;max-width:420px;animation:fadeUp 0.7s ease 0.1s both; }
+  .header-right { animation:fadeUp 0.7s ease 0.15s both;text-align:right; }
+  .your-rank-label { font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px; }
+  .your-rank-num { font-size:4rem;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);line-height:1;letter-spacing:-0.05em; }
+  .your-rank-sub { font-size:0.78rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px; }
+
+  /* SCOPE TABS */
+  .scope-bar {
+    position:relative;z-index:1;
+    padding:0 60px 48px;
+    display:flex;align-items:center;gap:8px;
+    animation:fadeUp 0.7s ease 0.2s both;
+  }
+  .scope-btn { background:transparent;border:1px solid var(--border2);color:var(--muted);padding:9px 22px;border-radius:100px;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.02em; }
+  .scope-btn:hover { border-color:rgba(246,230,94,0.3);color:var(--text); }
+  .scope-btn.active { background:var(--accent);border-color:var(--accent);color:var(--bg); }
+  .scope-sep { flex:1; }
+  .scope-search {
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface);border:1px solid var(--border2);
+    border-radius:10px;padding:9px 16px;
+  }
+  .scope-search input { background:none;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:0.78rem;width:200px; }
+  .scope-search input::placeholder { color:var(--muted2); }
+  .search-icon { color:var(--muted);font-size:0.85rem; }
+
+  /* PODIUM */
+  .podium-section {
+    position:relative;z-index:1;
+    padding:0 60px 64px;
+    animation:fadeUp 0.7s ease 0.25s both;
+  }
+  .podium-wrap {
+    display:flex;align-items:flex-end;justify-content:center;gap:0;
+    height:320px;
+    background:linear-gradient(180deg,rgba(246,230,94,0.03) 0%,transparent 100%);
+    border:1px solid var(--border2);border-radius:20px;
+    padding:0 60px;
+    position:relative;overflow:hidden;
+  }
+  /* sparkle bg */
+  .podium-wrap::before {
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 100%,rgba(246,230,94,0.06) 0%,transparent 70%);
+    pointer-events:none;
+  }
+
+  .podium-slot { display:flex;flex-direction:column;align-items:center;flex:1;position:relative; }
+
+  /* Columns */
+  .podium-col {
+    width:100%;
+    border-radius:8px 8px 0 0;
+    position:relative;display:flex;align-items:flex-end;justify-content:center;
+    padding-bottom:16px;
+  }
+  .podium-col-1 { height:160px;background:linear-gradient(180deg,rgba(246,230,94,0.18) 0%,rgba(246,230,94,0.06) 100%);border:1px solid rgba(246,230,94,0.2);border-bottom:none; }
+  .podium-col-2 { height:110px;background:linear-gradient(180deg,rgba(203,213,224,0.12) 0%,rgba(203,213,224,0.04) 100%);border:1px solid rgba(203,213,224,0.15);border-bottom:none; }
+  .podium-col-3 { height:80px;background:linear-gradient(180deg,rgba(237,137,54,0.12) 0%,rgba(237,137,54,0.04) 100%);border:1px solid rgba(237,137,54,0.15);border-bottom:none; }
+  .podium-rank-num { font-family:'DM Mono',monospace;font-size:1.4rem;font-weight:400;opacity:0.5; }
+
+  .podium-user { position:absolute;top:-120px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;white-space:nowrap; }
+  .p-avatar {
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:1rem;font-weight:700;color:white;position:relative;
+  }
+  .p-avatar-1 { width:64px;height:64px;background:linear-gradient(135deg,#f6e05e,#ed8936);font-size:1.3rem;box-shadow:0 0 30px rgba(246,230,94,0.4); }
+  .p-avatar-2 { width:54px;height:54px;background:linear-gradient(135deg,#a0aec0,#718096);box-shadow:0 0 20px rgba(160,174,192,0.2); }
+  .p-avatar-3 { width:48px;height:48px;background:linear-gradient(135deg,#ed8936,#c05621);box-shadow:0 0 16px rgba(237,137,54,0.2); }
+
+  .p-crown { position:absolute;top:-22px;font-size:1.2rem; animation:crownFloat 3s ease-in-out infinite; }
+  @keyframes crownFloat { 0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);} }
+
+  .p-name { font-size:0.85rem;font-weight:700;letter-spacing:-0.01em; }
+  .p-score { font-family:'DM Mono',monospace;font-size:0.75rem; }
+  .p-score-1 { color:var(--accent); }
+  .p-score-2 { color:var(--silver); }
+  .p-score-3 { color:var(--bronze); }
+
+  .p-badge {
+    padding:3px 10px;border-radius:100px;font-family:'DM Mono',monospace;font-size:0.6rem;
+    letter-spacing:0.06em;border:1px solid;
+  }
+  .p-badge-1 { color:var(--accent);border-color:rgba(246,230,94,0.3);background:rgba(246,230,94,0.08); }
+  .p-badge-2 { color:var(--silver);border-color:rgba(203,213,224,0.3);background:rgba(203,213,224,0.06); }
+  .p-badge-3 { color:var(--bronze);border-color:rgba(237,137,54,0.3);background:rgba(237,137,54,0.06); }
+
+  /* YOUR POSITION HIGHLIGHT */
+  .you-banner {
+    position:relative;z-index:1;
+    margin:0 60px 24px;
+    background:linear-gradient(135deg,rgba(246,230,94,0.08) 0%,rgba(246,173,85,0.06) 100%);
+    border:1px solid rgba(246,230,94,0.2);
+    border-radius:14px;
+    padding:20px 28px;
+    display:flex;align-items:center;gap:20px;
+    animation:fadeUp 0.7s ease 0.3s both;
+  }
+  .you-banner::before { content:'YOU';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent);letter-spacing:0.2em;opacity:0.5; }
+  .yb-rank { font-family:'DM Mono',monospace;font-size:2rem;font-weight:400;color:var(--accent);min-width:56px;line-height:1; }
+  .yb-avatar { width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--bronze));display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--bg);flex-shrink:0; }
+  .yb-info { flex:1; }
+  .yb-name { font-size:0.95rem;font-weight:700;margin-bottom:2px; }
+  .yb-meta { font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted); }
+  .yb-score { font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:400;color:var(--accent);letter-spacing:-0.03em; }
+  .yb-change { font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--green);background:rgba(104,211,145,0.1);border:1px solid rgba(104,211,145,0.2);border-radius:100px;padding:3px 10px; }
+  .yb-divider { width:1px;height:40px;background:var(--border); }
+
+  /* LEADERBOARD TABLE */
+  .leaderboard-section {
+    position:relative;z-index:1;
+    padding:0 60px 80px;
+  }
+  .lb-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:24px; }
+  .lb-title-tag { font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase; }
+  .lb-title { font-size:1.1rem;font-weight:700;letter-spacing:-0.02em; }
+  .lb-filter { display:flex;gap:8px; }
+  .lb-filter-btn { background:transparent;border:1px solid var(--border2);color:var(--muted);padding:6px 14px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.68rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase; }
+  .lb-filter-btn:hover { border-color:rgba(246,230,94,0.3);color:var(--text); }
+  .lb-filter-btn.active { background:rgba(246,230,94,0.1);border-color:rgba(246,230,94,0.3);color:var(--accent); }
+
+  /* Table */
+  .lb-table { width:100%;border-collapse:collapse; }
+  .lb-table thead tr { border-bottom:1px solid var(--border2); }
+  .lb-table th { font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted2);letter-spacing:0.12em;text-transform:uppercase;padding:0 16px 14px;text-align:left;font-weight:400; }
+  .lb-table th:first-child { width:60px;text-align:center; }
+  .lb-table th:last-child { text-align:right; }
+
+  .lb-row {
+    border-bottom:1px solid rgba(246,230,94,0.04);
+    cursor:pointer;transition:background 0.15s;
+    animation:fadeUp 0.5s ease both;
+  }
+  .lb-row:hover { background:rgba(246,230,94,0.03); }
+  .lb-row.highlight { background:rgba(246,230,94,0.05);border-color:rgba(246,230,94,0.08); }
+
+  .lb-table td { padding:16px; }
+  .td-rank-num { text-align:center;font-family:'DM Mono',monospace;font-size:0.9rem;color:var(--muted); }
+  .td-rank-num.top3 { font-size:1.1rem; }
+
+  .td-user { display:flex;align-items:center;gap:12px; }
+  .u-avatar { width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;flex-shrink:0; }
+  .u-name { font-size:0.9rem;font-weight:700; }
+  .u-country { font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:4px; }
+  .u-badges { display:flex;gap:4px;margin-top:2px; }
+  .u-badge { font-size:0.65rem;opacity:0.7; }
+
+  .td-iq { font-family:'DM Mono',monospace;font-size:1.05rem; }
+  .td-tests { font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted); }
+  .td-change { font-family:'DM Mono',monospace;font-size:0.75rem;display:flex;align-items:center;gap:3px; }
+  .change-up { color:var(--green); }
+  .change-down { color:var(--red); }
+  .change-same { color:var(--muted); }
+  .td-score-bar { min-width:120px; }
+  .score-track { height:4px;background:var(--border2);border-radius:2px;overflow:hidden; }
+  .score-fill { height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);width:0%; }
+
+  .td-action { text-align:right; }
+  .view-profile { background:transparent;border:1px solid var(--border2);color:var(--muted);padding:6px 14px;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase; }
+  .view-profile:hover { border-color:rgba(246,230,94,0.3);color:var(--accent); }
+
+  /* STATS BOTTOM */
+  .stats-bottom {
+    position:relative;z-index:1;
+    padding:0 60px 80px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  }
+  .stat-card { background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px 28px;transition:all 0.25s;cursor:default; }
+  .stat-card:hover { border-color:rgba(246,230,94,0.2);background:var(--surface2); }
+  .sc-label { font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px; }
+  .sc-num { font-family:'DM Mono',monospace;font-size:2.8rem;font-weight:400;color:var(--accent);line-height:1;margin-bottom:8px;letter-spacing:-0.04em; }
+  .sc-sub { font-size:0.78rem;color:var(--muted);line-height:1.6; }
+
+  /* Country breakdown */
+  .country-section {
+    position:relative;z-index:1;
+    padding:0 60px 100px;
+    display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  }
+  .country-card { background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px; }
+  .cc-title { font-size:1rem;font-weight:700;margin-bottom:4px; }
+  .cc-sub { font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);margin-bottom:28px; }
+  .country-list { display:flex;flex-direction:column;gap:12px; }
+  .country-row { display:flex;align-items:center;gap:12px; }
+  .country-flag { font-size:1.3rem;min-width:28px; }
+  .country-name { font-size:0.85rem;font-weight:600;min-width:100px; }
+  .country-track { flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden; }
+  .country-fill { height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--bronze));transition:width 1.4s cubic-bezier(0.4,0,0.2,1);width:0%; }
+  .country-iq { font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent);min-width:36px;text-align:right; }
+
+  /* Activity heatmap */
+  .heatmap-card { background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px; }
+  .hm-title { font-size:1rem;font-weight:700;margin-bottom:4px; }
+  .hm-sub { font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);margin-bottom:28px; }
+  .heatmap-grid { display:grid;grid-template-columns:repeat(26,1fr);gap:3px; }
+  .hm-cell { aspect-ratio:1;border-radius:2px;transition:transform 0.15s; }
+  .hm-cell:hover { transform:scale(1.4); }
+  .hm-0 { background:rgba(246,230,94,0.04); }
+  .hm-1 { background:rgba(246,230,94,0.15); }
+  .hm-2 { background:rgba(246,230,94,0.3); }
+  .hm-3 { background:rgba(246,230,94,0.55); }
+  .hm-4 { background:rgba(246,230,94,0.85); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+
+  @media(max-width:900px){
+    nav{padding:16px 24px;} .nav-links{display:none;}
+    .page-header,.scope-bar,.podium-section,.leaderboard-section,.stats-bottom,.country-section{padding-left:24px;padding-right:24px;}
+    .page-header{flex-direction:column;align-items:flex-start;gap:24px;}
+    .you-banner{margin:0 24px 24px;}
+    .podium-wrap{padding:0 20px;}
+    .stats-bottom{grid-template-columns:1fr;}
+    .country-section{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="../iq-platform.html" class="logo">
+    <div class="logo-icon">IQ</div>
+    Neuro<span>IQ</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="iq-platform.html">Bosh sahifa</a></li>
+    <li><a href="./iq-tests.html">Testlar</a></li>
+    <li><a href="./iq-results.html">Natijalar</a></li>
+    <li><a href="./iq-ilm.html">Ilm</a></li>
+    <li><a href="./iq-reyting.html" class="active">Reyting</a></li>
+  </ul>
+  <div class="nav-avatar">U</div>
+</nav>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">neuroiq / <span>reyting</span></div>
+    <h1 class="page-title">Global<br><em>Reyting</em></h1>
+    <p class="page-sub">Dunyo bo'yicha 2.4 million foydalanuvchi orasida o'z o'rningizni toping. Har kuni yangilanadi.</p>
+  </div>
+  <div class="header-right">
+    <div class="your-rank-label">// sizning o'rningiz</div>
+    <div class="your-rank-num">#1,247</div>
+    <div class="your-rank-sub">global · top 0.05%</div>
+  </div>
+</div>
+
+<!-- SCOPE TABS -->
+<div class="scope-bar">
+  <button class="scope-btn active" data-scope="global">🌍 Global</button>
+  <button class="scope-btn" data-scope="country">🇺🇿 O'zbekiston</button>
+  <button class="scope-btn" data-scope="friends">👥 Do'stlar</button>
+  <button class="scope-btn" data-scope="weekly">📅 Haftalik</button>
+  <div class="scope-sep"></div>
+  <div class="scope-search">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Foydalanuvchi qidirish..." id="searchInput">
+  </div>
+</div>
+
+<!-- PODIUM -->
+<div class="podium-section">
+  <div class="podium-wrap">
+
+    <!-- 2nd place -->
+    <div class="podium-slot">
+      <div class="podium-user">
+        <div class="p-avatar p-avatar-2">AK</div>
+        <div class="p-name">Amir Karimov</div>
+        <div class="p-score p-score-2">IQ 147</div>
+        <div class="p-badge p-badge-2">🇰🇿 Qozog'iston</div>
+      </div>
+      <div class="podium-col podium-col-2">
+        <div class="podium-rank-num" style="color:var(--silver)">2</div>
+      </div>
+    </div>
+
+    <!-- 1st place -->
+    <div class="podium-slot">
+      <div class="podium-user">
+        <div class="p-avatar p-avatar-1">
+          <div class="p-crown">👑</div>
+          ZM
+        </div>
+        <div class="p-name" style="font-size:1rem">Zafar Mirzayev</div>
+        <div class="p-score p-score-1">IQ 158</div>
+        <div class="p-badge p-badge-1">🇺🇿 O'zbekiston</div>
+      </div>
+      <div class="podium-col podium-col-1">
+        <div class="podium-rank-num" style="color:var(--accent)">1</div>
+      </div>
+    </div>
+
+    <!-- 3rd place -->
+    <div class="podium-slot">
+      <div class="podium-user">
+        <div class="p-avatar p-avatar-3">SM</div>
+        <div class="p-name">Sofia Müller</div>
+        <div class="p-score p-score-3">IQ 144</div>
+        <div class="p-badge p-badge-3">🇩🇪 Germaniya</div>
+      </div>
+      <div class="podium-col podium-col-3">
+        <div class="podium-rank-num" style="color:var(--bronze)">3</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- YOUR POSITION -->
+<div class="you-banner">
+  <div class="yb-rank">#1247</div>
+  <div class="yb-divider"></div>
+  <div class="yb-avatar">U</div>
+  <div class="yb-info">
+    <div class="yb-name">Siz (Foydalanuvchi)</div>
+    <div class="yb-meta">O'zbekiston · 12 test o'tildi · So'nggi faollik: bugun</div>
+  </div>
+  <div class="yb-divider"></div>
+  <div style="text-align:right">
+    <div class="yb-score">128</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted)">IQ ball</div>
+  </div>
+  <div class="yb-change">▲ +23 bu hafta</div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="leaderboard-section">
+  <div class="lb-header">
+    <div>
+      <div class="lb-title-tag">// eng yaxshi natijalar</div>
+      <div class="lb-title">To'liq reyting jadvali</div>
+    </div>
+    <div class="lb-filter">
+      <button class="lb-filter-btn active">Hammasi</button>
+      <button class="lb-filter-btn">IQ</button>
+      <button class="lb-filter-btn">Mantiq</button>
+      <button class="lb-filter-btn">Xotira</button>
+    </div>
+  </div>
+
+  <table class="lb-table" id="lbTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Foydalanuvchi</th>
+        <th>IQ ball</th>
+        <th>Testlar</th>
+        <th>O'zgarish</th>
+        <th>Natija</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="lbBody"></tbody>
+  </table>
+</div>
+
+<!-- STATS -->
+<div class="stats-bottom">
+  <div class="stat-card">
+    <div class="sc-label">// eng yuqori IQ</div>
+    <div class="sc-num">158</div>
+    <div class="sc-sub">Zafar Mirzayev tomonidan. O'rta ko'rsatkich: 112.4</div>
+  </div>
+  <div class="stat-card">
+    <div class="sc-label">// jami ishtirokchilar</div>
+    <div class="sc-num">2.4M</div>
+    <div class="sc-sub">175 mamlakatdan. Bu hafta 48,320 yangi foydalanuvchi</div>
+  </div>
+  <div class="stat-card">
+    <div class="sc-label">// o'tilgan testlar</div>
+    <div class="sc-num">18.7M</div>
+    <div class="sc-sub">Jami. Har kuni o'rtacha 52,000 test o'tilmoqda</div>
+  </div>
+</div>
+
+<!-- COUNTRY + HEATMAP -->
+<div class="country-section">
+  <div class="country-card">
+    <div class="cc-title">Mamlakatlar reytingi</div>
+    <div class="cc-sub">// o'rtacha IQ bo'yicha top 8</div>
+    <div class="country-list" id="countryList">
+      <div class="country-row"><span class="country-flag">🇯🇵</span><span class="country-name">Yaponiya</span><div class="country-track"><div class="country-fill" data-w="96"></div></div><span class="country-iq">130</span></div>
+      <div class="country-row"><span class="country-flag">🇰🇷</span><span class="country-name">Janubiy Koreya</span><div class="country-track"><div class="country-fill" data-w="94"></div></div><span class="country-iq">128</span></div>
+      <div class="country-row"><span class="country-flag">🇸🇬</span><span class="country-name">Singapur</span><div class="country-track"><div class="country-fill" data-w="93"></div></div><span class="country-iq">127</span></div>
+      <div class="country-row"><span class="country-flag">🇨🇳</span><span class="country-name">Xitoy</span><div class="country-track"><div class="country-fill" data-w="90"></div></div><span class="country-iq">124</span></div>
+      <div class="country-row"><span class="country-flag">🇩🇪</span><span class="country-name">Germaniya</span><div class="country-track"><div class="country-fill" data-w="87"></div></div><span class="country-iq">120</span></div>
+      <div class="country-row"><span class="country-flag">🇺🇿</span><span class="country-name">O'zbekiston</span><div class="country-track"><div class="country-fill" data-w="82"></div></div><span class="country-iq">115</span></div>
+      <div class="country-row"><span class="country-flag">🇺🇸</span><span class="country-name">AQSh</span><div class="country-track"><div class="country-fill" data-w="80"></div></div><span class="country-iq">113</span></div>
+      <div class="country-row"><span class="country-flag">🇰🇿</span><span class="country-name">Qozog'iston</span><div class="country-track"><div class="country-fill" data-w="78"></div></div><span class="country-iq">111</span></div>
+    </div>
+  </div>
+
+  <div class="heatmap-card">
+    <div class="hm-title">Faollik xaritasi</div>
+    <div class="hm-sub">// so'nggi 6 oy · sizning testlaringiz</div>
+    <div class="heatmap-grid" id="heatmapGrid"></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:16px;">
+      <span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted2)">Kam</span>
+      <div style="width:12px;height:12px;border-radius:2px;" class="hm-0"></div>
+      <div style="width:12px;height:12px;border-radius:2px;" class="hm-1"></div>
+      <div style="width:12px;height:12px;border-radius:2px;" class="hm-2"></div>
+      <div style="width:12px;height:12px;border-radius:2px;" class="hm-3"></div>
+      <div style="width:12px;height:12px;border-radius:2px;" class="hm-4"></div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted2)">Ko'p</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cursor=document.getElementById('cursor'), ring=document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-4+'px';cursor.style.top=my-4+'px';});
+  (function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx-18+'px';ring.style.top=ry-18+'px';requestAnimationFrame(animRing);})();
+  document.querySelectorAll('button,a,.stat-card,.country-row,.hm-cell,.lb-row').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.transform='scale(2.5)';ring.style.borderColor='rgba(246,230,94,0.7)';});
+    el.addEventListener('mouseleave',()=>{cursor.style.transform='scale(1)';ring.style.borderColor='rgba(246,230,94,0.4)';});
+  });
+
+  // Scope tabs
+  document.querySelectorAll('.scope-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{document.querySelectorAll('.scope-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');});
+  });
+
+  // LB filter
+  document.querySelectorAll('.lb-filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{document.querySelectorAll('.lb-filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');});
+  });
+
+  // Leaderboard data
+  const players = [
+    {rank:1,  name:'Zafar Mirzayev',  country:'🇺🇿',city:'Toshkent',    iq:158, tests:47, change:+2,  pct:100, color:'#f6e05e'},
+    {rank:2,  name:'Amir Karimov',    country:'🇰🇿',city:'Almaty',      iq:147, tests:38, change:0,   pct:93,  color:'#cbd5e0'},
+    {rank:3,  name:'Sofia Müller',    country:'🇩🇪',city:'Berlin',      iq:144, tests:52, change:-1,  pct:91,  color:'#ed8936'},
+    {rank:4,  name:'Yuki Tanaka',     country:'🇯🇵',city:'Tokyo',       iq:141, tests:61, change:+3,  pct:89,  color:'#b794f4'},
+    {rank:5,  name:'Liu Wei',         country:'🇨🇳',city:'Shanghai',    iq:139, tests:29, change:+1,  pct:88,  color:'#68d391'},
+    {rank:6,  name:'Elena Petrova',   country:'🇷🇺',city:'Moskva',      iq:137, tests:44, change:-2,  pct:86,  color:'#63b3ed'},
+    {rank:7,  name:'Arjun Sharma',    country:'🇮🇳',city:'Mumbai',      iq:135, tests:33, change:+5,  pct:85,  color:'#f6ad55'},
+    {rank:8,  name:'Min-jun Lee',     country:'🇰🇷',city:'Seoul',       iq:133, tests:58, change:-1,  pct:84,  color:'#4fd1c5'},
+    {rank:9,  name:'Layla Hassan',    country:'🇪🇬',city:'Qohira',      iq:131, tests:26, change:+2,  pct:83,  color:'#f687b3'},
+    {rank:10, name:'Tobias Brandt',   country:'🇩🇪',city:'Münhen',      iq:130, tests:41, change:0,   pct:82,  color:'#b794f4'},
+    {rank:11, name:'Ana Costa',       country:'🇧🇷',city:'San Paulo',   iq:129, tests:37, change:+4,  pct:81,  color:'#68d391'},
+    {rank:12, name:'Ivan Kovalenko',  country:'🇺🇦',city:'Kiev',        iq:128, tests:19, change:-3,  pct:81,  color:'#63b3ed'},
+  ];
+
+  const avatarColors = ['linear-gradient(135deg,#f6e05e,#ed8936)','linear-gradient(135deg,#b794f4,#63b3ed)','linear-gradient(135deg,#68d391,#4fd1c5)','linear-gradient(135deg,#f687b3,#b794f4)','linear-gradient(135deg,#63b3ed,#4fd1c5)'];
+
+  const tbody = document.getElementById('lbBody');
+  players.forEach((p,i)=>{
+    const initials = p.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    const medalEmoji = p.rank===1?'🥇':p.rank===2?'🥈':p.rank===3?'🥉':'';
+    const rankColor = p.rank===1?'var(--accent)':p.rank===2?'var(--silver)':p.rank===3?'var(--bronze)':'var(--muted)';
+    const changeHtml = p.change>0
+      ? `<span class="change-up">▲ +${p.change}</span>`
+      : p.change<0
+      ? `<span class="change-down">▼ ${p.change}</span>`
+      : `<span class="change-same">— 0</span>`;
+
+    const tr = document.createElement('tr');
+    tr.className = 'lb-row';
+    if(p.rank===1247) tr.classList.add('highlight');
+    tr.style.animationDelay = i*0.04+'s';
+    tr.innerHTML = `
+      <td><div class="td-rank-num ${p.rank<=3?'top3':''}" style="color:${rankColor}">${medalEmoji||p.rank}</div></td>
+      <td>
+        <div class="td-user">
+          <div class="u-avatar" style="background:${avatarColors[i%avatarColors.length]};color:${p.rank<=3?'#050810':'white'}">${initials}</div>
+          <div>
+            <div class="u-name">${p.name}</div>
+            <div class="u-country">${p.country} ${p.city}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="td-iq" style="color:${p.rank<=3?rankColor:'var(--text)'}">${p.iq}</span></td>
+      <td><span class="td-tests">${p.tests} ta</span></td>
+      <td><div class="td-change">${changeHtml}</div></td>
+      <td>
+        <div class="td-score-bar">
+          <div class="score-track"><div class="score-fill" style="background:${p.color}" data-w="${p.pct}"></div></div>
+        </div>
+      </td>
+      <td><div class="td-action"><button class="view-profile">Ko'rish</button></div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Animate score fills
+  function animateScoreFills(){
+    document.querySelectorAll('.score-fill, .country-fill').forEach(el=>{
+      const w=el.dataset.w;
+      if(w) el.style.width=w+'%';
+    });
+  }
+  setTimeout(animateScoreFills,400);
+
+  // Generate heatmap
+  const heatmapGrid=document.getElementById('heatmapGrid');
+  const levels=[0,0,0,1,0,0,1,2,0,0,1,0,2,3,1,0,0,2,1,0,3,2,0,1,0,0,
+                0,1,0,0,2,1,0,0,3,2,1,0,0,1,2,0,0,1,0,2,0,0,1,0,0,
+                1,2,3,4,2,1,0,0,2,3,1,0,1,2,0,0,3,2,1,0,0,1,2,0,0,1,
+                0,0,1,2,0,3,2,1,0,0,1,2,3,2,0,1,0,0,2,1,0,0,3,2,1,0,
+                0,1,0,0,2,3,1,0,0,1,2,0,0,3,4,3,2,1,0,0,1,2,0,0,1,0,
+                0,2,1,0,0,1,2,3,1,0,0,2,1,0,0,1,2,3,4,3,2,1,0,0,1,2,
+                0,0,3,4,3,2,1,0,0,1,2,0,0,1,2,3,1,0,0,1,0,0,2,1,0,0];
+  levels.slice(0,26*4).forEach(lvl=>{
+    const cell=document.createElement('div');
+    cell.className=`hm-cell hm-${lvl}`;
+    heatmapGrid.appendChild(cell);
+  });
+
+  // Search
+  document.getElementById('searchInput').addEventListener('input',function(){
+    const q=this.value.toLowerCase();
+    document.querySelectorAll('.lb-row').forEach(row=>{
+      const name=row.querySelector('.u-name').textContent.toLowerCase();
+      row.style.display=name.includes(q)||q===''?'':'none';
+    });
+  });
+
+  // Scroll reveal
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';obs.unobserve(e.target);}
+    });
+  },{threshold:0.08});
+  document.querySelectorAll('.stat-card,.country-row,.lb-row').forEach((el,i)=>{
+    el.style.opacity='0';el.style.transform='translateY(16px)';
+    el.style.transition=`opacity 0.45s ease ${i*0.035}s, transform 0.45s ease ${i*0.035}s, background 0.15s`;
+    obs.observe(el);
+  });
+</script>
+</body>
+</html>
