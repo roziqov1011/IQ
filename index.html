@@ -740,6 +740,14 @@
     <li><a href="#">Bog'lanish</a></li>
   </ul>
 </footer>
+<!-- MODAL VIDEO -->
+<div id="myModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.7);">
+    <div style="background-color:#1a1a1a; margin:10% auto; padding:20px; border:1px solid #888; width:90%; max-width:800px; border-radius:10px;">
+        <span class="close" style="color:#aaa; float:right; font-size:28px; font-weight:bold; cursor:pointer;">&times;</span>
+        <iframe width="100%" height="500" src="https://www.youtube.com/embed/mQ47TXGuots" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+</div>
+
 
 <script>
   // Custom cursor
@@ -847,6 +855,18 @@
       bar.style.height = barH + 'px';
     }, 300 + data.indexOf(d) * 80);
   });
+  var modal = document.getElementById("myModal");
+    document.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", function() {
+            modal.style.display = "block";
+        });
+    });
+    document.querySelector(".close").onclick = function() {
+        modal.style.display = "none";
+    };
+    window.onclick = function(event) {
+        if (event.target == modal) modal.style.display = "none";
+    };
 </script>
 </body>
 </html>
