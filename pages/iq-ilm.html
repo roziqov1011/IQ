@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ilm — NeuroIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --bg2: #080d1a;
+    --surface: #0d1425;
+    --surface2: #111827;
+    --border: rgba(99,179,237,0.12);
+    --border2: rgba(99,179,237,0.06);
+    --accent: #63b3ed;
+    --accent2: #f6ad55;
+    --gold: #f6e05e;
+    --green: #68d391;
+    --red: #fc8181;
+    --purple: #b794f4;
+    --teal: #4fd1c5;
+    --rose: #f687b3;
+    --text: #e2e8f0;
+    --muted: #718096;
+    --muted2: #4a5568;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Syne',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+    cursor:none;
+  }
+
+  .cursor{width:8px;height:8px;background:var(--accent);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transition:transform 0.1s;mix-blend-mode:screen;}
+  .cursor-ring{width:36px;height:36px;border:1px solid rgba(99,179,237,0.4);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:all 0.18s ease;}
+
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(99,179,237,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+
+  .blob{position:fixed;border-radius:50%;filter:blur(150px);pointer-events:none;z-index:0;animation:bfloat 16s ease-in-out infinite;}
+  .blob-1{width:700px;height:700px;background:rgba(183,148,244,0.055);top:-200px;right:-150px;}
+  .blob-2{width:500px;height:500px;background:rgba(99,179,237,0.05);bottom:-100px;left:-100px;animation-delay:-8s;}
+  .blob-3{width:350px;height:350px;background:rgba(246,173,85,0.04);top:40%;left:35%;animation-delay:-4s;}
+  @keyframes bfloat{0%,100%{transform:translate(0,0);}50%{transform:translate(25px,-30px);}}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:20px 60px;background:rgba(5,8,16,0.75);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);}
+  .logo{display:flex;align-items:center;gap:10px;font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;text-decoration:none;color:var(--text);}
+  .logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--bg);}
+  .logo span{color:var(--accent);}
+  .nav-links{display:flex;gap:36px;list-style:none;}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;transition:color 0.2s;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--purple);}
+  .nav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--bg);cursor:pointer;}
+
+  /* PAGE HEADER */
+  .page-header{
+    position:relative;z-index:1;
+    padding:140px 60px 64px;
+  }
+  .breadcrumb{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted2);letter-spacing:0.08em;margin-bottom:20px;}
+  .breadcrumb span{color:var(--purple);}
+  .page-title{font-size:clamp(2.8rem,6vw,6rem);font-weight:800;letter-spacing:-0.04em;line-height:0.95;margin-bottom:20px;animation:fadeUp 0.7s ease both;}
+  .page-title em{font-style:normal;background:linear-gradient(135deg,var(--purple) 0%,var(--rose) 60%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .page-sub{color:var(--muted);font-size:1rem;line-height:1.75;max-width:520px;animation:fadeUp 0.7s ease 0.1s both;}
+
+  /* TOPIC FILTERS */
+  .topics-bar{
+    position:relative;z-index:1;
+    padding:0 60px 52px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    animation:fadeUp 0.7s ease 0.15s both;
+  }
+  .topic-chip{
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:8px 18px;border-radius:100px;
+    font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:600;
+    cursor:pointer;transition:all 0.2s;
+    display:flex;align-items:center;gap:6px;
+  }
+  .topic-chip:hover{border-color:rgba(183,148,244,0.4);color:var(--text);}
+  .topic-chip.active{background:var(--purple);border-color:var(--purple);color:var(--bg);}
+  .topic-count{font-family:'DM Mono',monospace;font-size:0.65rem;opacity:0.7;}
+
+  /* FEATURED ARTICLE */
+  .featured-wrap{
+    position:relative;z-index:1;
+    padding:0 60px 60px;
+    animation:fadeUp 0.7s ease 0.2s both;
+  }
+  .featured-tag{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--purple);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+  .featured-tag::before{content:'';display:inline-block;width:20px;height:1px;background:var(--purple);}
+
+  .featured-article{
+    display:grid;grid-template-columns:1fr 420px;
+    gap:0;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;overflow:hidden;
+    cursor:pointer;transition:all 0.3s;
+    position:relative;
+  }
+  .featured-article::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--rose),var(--accent2));}
+  .featured-article:hover{border-color:rgba(183,148,244,0.3);box-shadow:0 30px 80px rgba(0,0,0,0.4);}
+
+  .fa-content{padding:52px 52px 48px;}
+  .fa-category{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(183,148,244,0.1);border:1px solid rgba(183,148,244,0.2);
+    color:var(--purple);padding:5px 14px;border-radius:100px;
+    font-size:0.72rem;font-weight:600;letter-spacing:0.06em;
+    text-transform:uppercase;margin-bottom:24px;
+  }
+  .fa-title{
+    font-family:'Lora',serif;
+    font-size:2rem;font-weight:600;line-height:1.25;letter-spacing:-0.01em;
+    margin-bottom:16px;
+  }
+  .fa-excerpt{color:var(--muted);font-size:0.92rem;line-height:1.75;margin-bottom:28px;max-width:480px;}
+  .fa-meta{display:flex;align-items:center;gap:20px;}
+  .fa-author{display:flex;align-items:center;gap:10px;}
+  .fa-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--rose));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:white;}
+  .fa-author-name{font-size:0.82rem;font-weight:600;}
+  .fa-author-title{font-size:0.7rem;color:var(--muted);font-family:'DM Mono',monospace;}
+  .fa-divider{width:1px;height:32px;background:var(--border);}
+  .fa-stats{display:flex;gap:16px;}
+  .fa-stat{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);display:flex;align-items:center;gap:4px;}
+
+  .fa-visual{
+    background:linear-gradient(145deg,rgba(183,148,244,0.08) 0%,rgba(246,135,179,0.06) 50%,rgba(99,179,237,0.05) 100%);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+    border-left:1px solid var(--border);
+    min-height:320px;
+  }
+  .brain-svg{width:180px;height:180px;opacity:0.6;}
+
+  /* ARTICLES GRID */
+  .articles-section{
+    position:relative;z-index:1;
+    padding:0 60px 80px;
+  }
+  .articles-header{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:32px;
+  }
+  .articles-title{font-size:1.1rem;font-weight:700;letter-spacing:-0.02em;}
+  .articles-tag{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--purple);letter-spacing:0.12em;text-transform:uppercase;}
+  .view-all{background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.08em;cursor:pointer;text-transform:uppercase;transition:color 0.2s;}
+  .view-all:hover{color:var(--text);}
+
+  /* Main layout: big grid */
+  .articles-layout{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:16px;
+  }
+
+  /* Article cards */
+  .art-card{
+    background:var(--surface);
+    border:1px solid var(--border2);
+    border-radius:16px;
+    padding:28px 26px;
+    cursor:pointer;
+    transition:all 0.25s;
+    display:flex;flex-direction:column;
+    position:relative;overflow:hidden;
+  }
+  .art-card:hover{border-color:rgba(183,148,244,0.3);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.35);}
+  .art-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(183,148,244,0.06) 0%,transparent 65%);opacity:0;transition:opacity 0.3s;}
+  .art-card:hover::after{opacity:1;}
+
+  .art-card.col-span-4{grid-column:span 4;}
+  .art-card.col-span-6{grid-column:span 6;}
+  .art-card.col-span-3{grid-column:span 3;}
+
+  .art-cat{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:4px 12px;border-radius:100px;border:1px solid;
+    font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;
+    margin-bottom:16px;width:fit-content;
+  }
+  .cat-neuro{color:var(--purple);border-color:rgba(183,148,244,0.25);background:rgba(183,148,244,0.06);}
+  .cat-psixologiya{color:var(--rose);border-color:rgba(246,135,179,0.25);background:rgba(246,135,179,0.06);}
+  .cat-genetika{color:var(--green);border-color:rgba(104,211,145,0.25);background:rgba(104,211,145,0.06);}
+  .cat-kognitiv{color:var(--accent);border-color:rgba(99,179,237,0.25);background:rgba(99,179,237,0.06);}
+  .cat-amaliyot{color:var(--accent2);border-color:rgba(246,173,85,0.25);background:rgba(246,173,85,0.06);}
+  .cat-tadqiqot{color:var(--teal);border-color:rgba(79,209,197,0.25);background:rgba(79,209,197,0.06);}
+
+  .art-title{
+    font-family:'Lora',serif;
+    font-size:1.05rem;font-weight:600;line-height:1.35;letter-spacing:-0.01em;
+    margin-bottom:10px;flex:1;
+  }
+  .art-card.col-span-6 .art-title{font-size:1.3rem;}
+
+  .art-excerpt{font-size:0.8rem;color:var(--muted);line-height:1.65;margin-bottom:20px;}
+
+  .art-footer{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--border2);margin-top:auto;}
+  .art-read{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);}
+  .art-arrow{font-size:0.8rem;color:var(--muted);transition:all 0.2s;opacity:0;}
+  .art-card:hover .art-arrow{opacity:1;transform:translateX(4px);}
+
+  /* Read time bar */
+  .art-progress{position:absolute;bottom:0;left:0;height:2px;background:var(--purple);width:0%;border-radius:0 2px 2px 0;transition:width 0.5s ease;}
+  .art-card:hover .art-progress{width:35%;}
+
+  /* HIGHLIGHT BOX */
+  .highlight-box{
+    grid-column:span 12;
+    background:linear-gradient(135deg,rgba(183,148,244,0.08) 0%,rgba(246,135,179,0.06) 100%);
+    border:1px solid rgba(183,148,244,0.18);
+    border-radius:16px;
+    padding:36px 40px;
+    display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;
+  }
+  .hb-icon{font-size:3rem;}
+  .hb-title{font-size:1.1rem;font-weight:700;margin-bottom:6px;letter-spacing:-0.02em;}
+  .hb-text{font-size:0.85rem;color:var(--muted);line-height:1.7;}
+  .hb-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--purple);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+
+  /* QUICK FACTS STRIP */
+  .facts-strip{
+    position:relative;z-index:1;
+    padding:0 60px 80px;
+  }
+  .facts-label{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:20px;}
+  .facts-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border2);border:1px solid var(--border2);border-radius:16px;overflow:hidden;}
+  .fact-cell{
+    background:var(--bg2);
+    padding:32px 28px;
+    transition:background 0.2s;
+    cursor:default;
+  }
+  .fact-cell:hover{background:var(--surface);}
+  .fact-num{font-family:'DM Mono',monospace;font-size:2.4rem;font-weight:400;line-height:1;margin-bottom:8px;color:var(--purple);}
+  .fact-text{font-size:0.8rem;color:var(--muted);line-height:1.6;}
+
+  /* NEWSLETTER */
+  .newsletter{
+    position:relative;z-index:1;
+    margin:0 60px 80px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:56px 60px;
+    display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;
+    overflow:hidden;
+  }
+  .newsletter::before{content:'';position:absolute;top:-60px;right:180px;width:300px;height:300px;background:radial-gradient(circle,rgba(183,148,244,0.1),transparent 70%);pointer-events:none;}
+  .nl-tag{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--purple);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:12px;}
+  .nl-title{font-size:1.8rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:10px;}
+  .nl-sub{font-size:0.9rem;color:var(--muted);line-height:1.65;max-width:420px;}
+  .nl-form{display:flex;gap:10px;flex-shrink:0;}
+  .nl-input{
+    background:var(--bg);border:1px solid var(--border);
+    color:var(--text);padding:12px 20px;border-radius:10px;
+    font-family:'DM Mono',monospace;font-size:0.82rem;
+    outline:none;width:240px;transition:border-color 0.2s;
+  }
+  .nl-input:focus{border-color:rgba(183,148,244,0.5);}
+  .nl-input::placeholder{color:var(--muted2);}
+  .nl-btn{background:var(--purple);border:none;color:white;padding:12px 24px;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .nl-btn:hover{box-shadow:0 8px 28px rgba(183,148,244,0.3);transform:translateY(-1px);}
+
+  /* SIDEBAR-STYLE POPULAR */
+  .bottom-grid{
+    position:relative;z-index:1;
+    padding:0 60px 100px;
+    display:grid;grid-template-columns:1fr 380px;gap:24px;
+  }
+
+  /* Video cards */
+  .video-section-title{
+    font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);
+    letter-spacing:0.12em;text-transform:uppercase;margin-bottom:20px;
+  }
+  .video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .video-card{
+    background:var(--surface);border:1px solid var(--border2);
+    border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.25s;
+  }
+  .video-card:hover{transform:translateY(-3px);border-color:rgba(183,148,244,0.3);box-shadow:0 16px 50px rgba(0,0,0,0.3);}
+  .video-thumb{
+    height:130px;display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+  }
+  .play-btn{
+    width:44px;height:44px;border-radius:50%;
+    background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1rem;transition:all 0.2s;position:relative;z-index:1;
+  }
+  .video-card:hover .play-btn{background:var(--purple);border-color:var(--purple);transform:scale(1.1);}
+  .video-info{padding:16px;}
+  .video-title{font-size:0.82rem;font-weight:700;line-height:1.4;margin-bottom:6px;}
+  .video-meta{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);}
+
+  /* Trending sidebar */
+  .trending-box{
+    background:var(--surface);border:1px solid var(--border2);
+    border-radius:16px;padding:28px;
+  }
+  .trending-title{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:24px;}
+  .trending-list{display:flex;flex-direction:column;gap:0;}
+  .trending-item{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:16px 0;border-bottom:1px solid var(--border2);
+    cursor:pointer;transition:all 0.2s;
+  }
+  .trending-item:last-child{border-bottom:none;padding-bottom:0;}
+  .trending-item:first-child{padding-top:0;}
+  .trending-item:hover .ti-title{color:var(--purple);}
+  .ti-num{font-family:'DM Mono',monospace;font-size:1.4rem;font-weight:400;color:var(--muted2);line-height:1;min-width:28px;}
+  .ti-title{font-size:0.85rem;font-weight:600;line-height:1.4;margin-bottom:4px;transition:color 0.2s;}
+  .ti-meta{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+  @media(max-width:900px){
+    nav{padding:16px 24px;}
+    .nav-links{display:none;}
+    .page-header,.topics-bar,.featured-wrap,.articles-section,.facts-strip,.bottom-grid{padding-left:24px;padding-right:24px;}
+    .newsletter{margin:0 24px 60px;padding:36px 28px;grid-template-columns:1fr;gap:24px;}
+    .featured-article{grid-template-columns:1fr;}
+    .fa-visual{display:none;}
+    .art-card.col-span-4,.art-card.col-span-6,.art-card.col-span-3{grid-column:span 12;}
+    .facts-grid{grid-template-columns:repeat(2,1fr);}
+    .bottom-grid{grid-template-columns:1fr;}
+    .video-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="../iq-platform.html" class="logo">
+    <div class="logo-icon">IQ</div>
+    Neuro<span>IQ</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="../iq-platform.html">Bosh sahifa</a></li>
+    <li><a href="./iq-tests.html">Testlar</a></li>
+    <li><a href="./iq-results.html">Natijalar</a></li>
+    <li><a href="#" class="active">Ilm</a></li>
+    <li><a href="#">Reyting</a></li>
+  </ul>
+  <div class="nav-avatar">U</div>
+</nav>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="breadcrumb">neuroiq / <span>ilm</span></div>
+  <h1 class="page-title">Aql haqida<br><em>ilm</em></h1>
+  <p class="page-sub">Neyrologiya, kognitiv psixologiya va genetika sohasidagi so'nggi kashfiyotlar. Miya qanday ishlashini bilib oling.</p>
+</div>
+
+<!-- TOPIC FILTERS -->
+<div class="topics-bar">
+  <button class="topic-chip active" data-topic="all">Hammasi <span class="topic-count">48</span></button>
+  <button class="topic-chip" data-topic="neuro">🧠 Neyrologiya <span class="topic-count">14</span></button>
+  <button class="topic-chip" data-topic="psixologiya">🧬 Psixologiya <span class="topic-count">11</span></button>
+  <button class="topic-chip" data-topic="kognitiv">⚡ Kognitiv ilm <span class="topic-count">9</span></button>
+  <button class="topic-chip" data-topic="genetika">🔬 Genetika <span class="topic-count">7</span></button>
+  <button class="topic-chip" data-topic="amaliyot">💡 Amaliyot <span class="topic-count">7</span></button>
+</div>
+
+<!-- FEATURED ARTICLE -->
+<div class="featured-wrap">
+  <div class="featured-tag">Muharrir tanlovi</div>
+  <div class="featured-article">
+    <div class="fa-content">
+      <div class="fa-category">🧠 Neyrologiya</div>
+      <h2 class="fa-title">Miyaning plastikligi: Kattalar ham o'rganishda davom etadimi?</h2>
+      <p class="fa-excerpt">Neyron plastiklik haqidagi so'nggi tadqiqotlar shuni ko'rsatdiki, kattalar miyasi ham yangi ulanishlar hosil qilishga qodir. Ammo bu jarayon yoshlik davridagiga qaraganda nimaga muhtoj va qanday tezlashtiriladi?</p>
+      <div class="fa-meta">
+        <div class="fa-author">
+          <div class="fa-avatar">DP</div>
+          <div>
+            <div class="fa-author-name">Dr. Dilnoza Parvina</div>
+            <div class="fa-author-title">Neyrofizioloq · Toshkent DTU</div>
+          </div>
+        </div>
+        <div class="fa-divider"></div>
+        <div class="fa-stats">
+          <div class="fa-stat">📖 12 daq o'qish</div>
+          <div class="fa-stat">👁 8.4k ko'rish</div>
+          <div class="fa-stat">🔖 1.2k saqlash</div>
+        </div>
+      </div>
+    </div>
+    <div class="fa-visual">
+      <!-- Animated brain SVG -->
+      <svg class="brain-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="brainGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(183,148,244,0.6)"/>
+            <stop offset="100%" stop-color="rgba(183,148,244,0)"/>
+          </radialGradient>
+        </defs>
+        <!-- Pulsing rings -->
+        <circle cx="100" cy="100" r="80" stroke="rgba(183,148,244,0.15)" stroke-width="1" fill="none">
+          <animate attributeName="r" values="75;85;75" dur="4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0.1;0.3" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="100" cy="100" r="60" stroke="rgba(183,148,244,0.2)" stroke-width="1" fill="none">
+          <animate attributeName="r" values="55;65;55" dur="4s" begin="0.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.4;0.15;0.4" dur="4s" begin="0.5s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Brain shape -->
+        <path d="M100 40 C80 40 62 52 58 70 C50 70 40 78 42 92 C36 96 34 108 40 116 C38 128 46 140 58 142 C64 154 80 160 96 156 L100 156 L104 156 C120 160 136 154 142 142 C154 140 162 128 160 116 C166 108 164 96 158 92 C160 78 150 70 142 70 C138 52 120 40 100 40Z" stroke="rgba(183,148,244,0.5)" stroke-width="1.5" fill="rgba(183,148,244,0.06)"/>
+        <!-- Neural connections -->
+        <g stroke="rgba(183,148,244,0.3)" stroke-width="0.8">
+          <line x1="100" y1="60" x2="80" y2="90"><animate attributeName="opacity" values="0.2;0.7;0.2" dur="2s" repeatCount="indefinite"/></line>
+          <line x1="100" y1="60" x2="120" y2="90"><animate attributeName="opacity" values="0.2;0.7;0.2" dur="2s" begin="0.3s" repeatCount="indefinite"/></line>
+          <line x1="80" y1="90" x2="70" y2="120"><animate attributeName="opacity" values="0.2;0.6;0.2" dur="2.5s" begin="0.6s" repeatCount="indefinite"/></line>
+          <line x1="120" y1="90" x2="130" y2="120"><animate attributeName="opacity" values="0.2;0.6;0.2" dur="2.5s" begin="0.9s" repeatCount="indefinite"/></line>
+          <line x1="70" y1="120" x2="100" y2="130"><animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" begin="1.2s" repeatCount="indefinite"/></line>
+          <line x1="130" y1="120" x2="100" y2="130"><animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" begin="1.5s" repeatCount="indefinite"/></line>
+        </g>
+        <!-- Nodes -->
+        <g fill="rgba(183,148,244,0.8)">
+          <circle cx="100" cy="60" r="3"><animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/></circle>
+          <circle cx="80" cy="90" r="2.5"><animate attributeName="r" values="1.5;3.5;1.5" dur="2s" begin="0.3s" repeatCount="indefinite"/></circle>
+          <circle cx="120" cy="90" r="2.5"><animate attributeName="r" values="1.5;3.5;1.5" dur="2s" begin="0.6s" repeatCount="indefinite"/></circle>
+          <circle cx="70" cy="120" r="2"><animate attributeName="r" values="1;3;1" dur="2.5s" begin="0.9s" repeatCount="indefinite"/></circle>
+          <circle cx="130" cy="120" r="2"><animate attributeName="r" values="1;3;1" dur="2.5s" begin="1.2s" repeatCount="indefinite"/></circle>
+          <circle cx="100" cy="130" r="3"><animate attributeName="r" values="2;4;2" dur="3s" begin="1.5s" repeatCount="indefinite"/></circle>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ARTICLES GRID -->
+<div class="articles-section">
+  <div class="articles-header">
+    <div>
+      <div class="articles-tag">// so'nggi maqolalar</div>
+      <div class="articles-title">Barcha maqolalar</div>
+    </div>
+    <button class="view-all">Hammasini ko'rish →</button>
+  </div>
+
+  <div class="articles-layout">
+
+    <!-- Row 1 -->
+    <div class="art-card col-span-6" style="animation-delay:0s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-kognitiv">⚡ Kognitiv ilm</div>
+      <div class="art-title">Flynn effekti: Har avlod nima uchun oldingisidan aqlliroq bo'lmoqda?</div>
+      <div class="art-excerpt">1930-yillardan beri IQ ko'rsatkichlari har o'n yilda 3 ball oshib bormoqda. Buning sababi nima — genetika, ta'lim yoki texnologiyami?</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 8 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="art-card col-span-3" style="animation-delay:0.05s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-psixologiya">🧬 Psixologiya</div>
+      <div class="art-title">Uyqu va IQ: 1 soat kam uxlash qanday ta'sir qiladi?</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 5 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="art-card col-span-3" style="animation-delay:0.1s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-genetika">🔬 Genetika</div>
+      <div class="art-title">IQ qanchalik irsiy? Egizaklar tadqiqotlari nima deydi</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 6 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Highlight -->
+    <div class="highlight-box">
+      <div class="hb-icon">💡</div>
+      <div>
+        <div class="hb-tag">// ilmiy fakt</div>
+        <div class="hb-title">Miya o'z energiyasining 20% ini iste'mol qiladi — lekin tana vaznining atigi 2% ini tashkil etadi</div>
+        <div class="hb-text">Inson miyasi taxminan 86 milliard neyrondan iborat. Har bir neyrон boshqa 10,000 tagacha hujayralar bilan bog'langan. Ushbu murakkab tarmoq sekundiga 1 quadrillion operatsiya bajaradi.</div>
+      </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="art-card col-span-4" style="animation-delay:0.15s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-amaliyot">💡 Amaliyot</div>
+      <div class="art-title">Miya trenirovkasi: haftalik 30 daqiqa bilan IQ ni oshirish mumkinmi?</div>
+      <div class="art-excerpt">Dunning-Kruger effektidan tortib Mensa testgacha — ilmiy asoslangan usullarni ko'rib chiqamiz.</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 7 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="art-card col-span-4" style="animation-delay:0.2s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-neuro">🧠 Neyrologiya</div>
+      <div class="art-title">Prefrontal korteks: qarorlar qabul qilishning markaziy qismimi?</div>
+      <div class="art-excerpt">Miya skanerlari yordamida olingan yangi ma'lumotlar qaror qabul qilish mexanizmini yangicha tushuntiryapti.</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 9 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="art-card col-span-4" style="animation-delay:0.25s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-tadqiqot">🔭 Tadqiqot</div>
+      <div class="art-title">2024-yilning eng muhim kognitiv ilm kashfiyotlari</div>
+      <div class="art-excerpt">O'tgan yil neyrologiya va psixologiyada nima o'zgardi? Top 10 ilmiy kashfiyot.</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 11 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="art-card col-span-3" style="animation-delay:0.3s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-psixologiya">🧬 Psixologiya</div>
+      <div class="art-title">Stres va kognitiv funksiya: kortizoling roli</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 6 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="art-card col-span-3" style="animation-delay:0.35s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-amaliyot">💡 Amaliyot</div>
+      <div class="art-title">Meditatsiya miyani qanday o'zgartiradi? 8 haftalik tajriba</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 5 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="art-card col-span-6" style="animation-delay:0.4s">
+      <div class="art-progress"></div>
+      <div class="art-cat cat-kognitiv">⚡ Kognitiv ilm</div>
+      <div class="art-title">Bir vaqtda bir nechta ishni bajarish (multitasking) mifi: miyangiz aslida nima qilmoqda?</div>
+      <div class="art-excerpt">Ko'pchilik o'zini multitasking qila oladi deb hisoblaydi. Ammo neyrofan bunga qo'shilmaydi — va bu bilim hayotingizni o'zgartirishi mumkin.</div>
+      <div class="art-footer">
+        <div class="art-read">⏱ 8 daqiqa</div>
+        <div class="art-arrow">→</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- QUICK FACTS -->
+<div class="facts-strip">
+  <div class="facts-label">// miya haqida qisqacha</div>
+  <div class="facts-grid">
+    <div class="fact-cell">
+      <div class="fact-num">86B</div>
+      <div class="fact-text">Inson miyasidagi neyronlar soni. Har biri minglab boshqalari bilan bog'langan.</div>
+    </div>
+    <div class="fact-cell">
+      <div class="fact-num">120m/s</div>
+      <div class="fact-text">Neyron signallari uzatish tezligi. Saatiga 432 km — yorug'likdan ham sekin, lekin hayratlanarli.</div>
+    </div>
+    <div class="fact-cell">
+      <div class="fact-num">2%</div>
+      <div class="fact-text">Miyaning tana vazniga nisbati. Ammo tananing energiyasining 20% ini iste'mol qiladi.</div>
+    </div>
+    <div class="fact-cell">
+      <div class="fact-num">100T</div>
+      <div class="fact-text">Miyaning neyron ulanishlari soni. Koinotdagi yulduzlar sonidan ham ko'p deb taxmin qilinadi.</div>
+    </div>
+  </div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="newsletter">
+  <div>
+    <div class="nl-tag">// haftalik ilm xabarnomasi</div>
+    <div class="nl-title">Yangi kashfiyotlar, doim birinchi bo'lib</div>
+    <p class="nl-sub">Har hafta neyrologiya va kognitiv ilmdagi eng muhim yangiliklarni inbox ingizga yetkazamiz. Spam yo'q — faqat ilm.</p>
+  </div>
+  <div class="nl-form">
+    <input class="nl-input" type="email" placeholder="email@manzil.uz">
+    <button class="nl-btn">Obuna →</button>
+  </div>
+</div>
+
+<!-- BOTTOM: VIDEOS + TRENDING -->
+<div class="bottom-grid">
+  <!-- Video section -->
+  <div>
+    <div class="video-section-title">// video darslar</div>
+    <div class="video-grid">
+      <div class="video-card">
+        <div class="video-thumb" style="background:linear-gradient(135deg,rgba(183,148,244,0.15),rgba(99,179,237,0.1))">
+          <div class="play-btn">▶</div>
+        </div>
+        <div class="video-info">
+          <div class="video-title">Miya qanday o'rganadi? Neyron plastiklik asoslari</div>
+          <div class="video-meta">18:32 · 24k ko'rish</div>
+        </div>
+      </div>
+      <div class="video-card">
+        <div class="video-thumb" style="background:linear-gradient(135deg,rgba(246,135,179,0.12),rgba(183,148,244,0.1))">
+          <div class="play-btn">▶</div>
+        </div>
+        <div class="video-info">
+          <div class="video-title">IQ vs EQ: Qaysi biri muhimroq?</div>
+          <div class="video-meta">12:45 · 18k ko'rish</div>
+        </div>
+      </div>
+      <div class="video-card">
+        <div class="video-thumb" style="background:linear-gradient(135deg,rgba(79,209,197,0.1),rgba(104,211,145,0.08))">
+          <div class="play-btn">▶</div>
+        </div>
+        <div class="video-info">
+          <div class="video-title">Xotira ustasi: mnemonika texnikalari</div>
+          <div class="video-meta">22:10 · 31k ko'rish</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trending sidebar -->
+  <div class="trending-box">
+    <div class="trending-title">// eng ko'p o'qilgan</div>
+    <div class="trending-list">
+      <div class="trending-item">
+        <div class="ti-num">01</div>
+        <div>
+          <div class="ti-title">Flynn effekti nima va u haqiqatmi?</div>
+          <div class="ti-meta">12.4k o'qish · Kognitiv ilm</div>
+        </div>
+      </div>
+      <div class="trending-item">
+        <div class="ti-num">02</div>
+        <div>
+          <div class="ti-title">Miya plastikligi: yangi tadqiqotlar</div>
+          <div class="ti-meta">9.8k o'qish · Neyrologiya</div>
+        </div>
+      </div>
+      <div class="trending-item">
+        <div class="ti-num">03</div>
+        <div>
+          <div class="ti-title">IQ va muvaffaqiyat: bog'liqlik bormi?</div>
+          <div class="ti-meta">8.2k o'qish · Psixologiya</div>
+        </div>
+      </div>
+      <div class="trending-item">
+        <div class="ti-num">04</div>
+        <div>
+          <div class="ti-title">Multitasking mifini sindirish</div>
+          <div class="ti-meta">7.6k o'qish · Kognitiv ilm</div>
+        </div>
+      </div>
+      <div class="trending-item">
+        <div class="ti-num">05</div>
+        <div>
+          <div class="ti-title">Uyqu etishmovchiligi va kognitiv pasayish</div>
+          <div class="ti-meta">6.9k o'qish · Psixologiya</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cursor=document.getElementById('cursor');
+  const ring=document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-4+'px';cursor.style.top=my-4+'px';});
+  (function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx-18+'px';ring.style.top=ry-18+'px';requestAnimationFrame(animRing);})();
+  document.querySelectorAll('button,a,.art-card,.video-card,.trending-item,.featured-article,.fact-cell').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.transform='scale(2.5)';ring.style.borderColor='rgba(183,148,244,0.7)';});
+    el.addEventListener('mouseleave',()=>{cursor.style.transform='scale(1)';ring.style.borderColor='rgba(99,179,237,0.4)';});
+  });
+
+  // Topic filter
+  document.querySelectorAll('.topic-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.topic-chip').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Scroll reveal
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.style.opacity='1';
+        e.target.style.transform='translateY(0)';
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:0.1});
+  document.querySelectorAll('.art-card,.video-card,.fact-cell,.trending-item').forEach((el,i)=>{
+    el.style.opacity='0';
+    el.style.transform='translateY(20px)';
+    el.style.transition=`opacity 0.5s ease ${i*0.04}s, transform 0.5s ease ${i*0.04}s, border-color 0.25s, background 0.25s, box-shadow 0.25s`;
+    obs.observe(el);
+  });
+</script>
+</body>
+</html>

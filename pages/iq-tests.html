@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testlar — NeuroIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --bg2: #080d1a;
+    --surface: #0d1425;
+    --surface2: #111827;
+    --border: rgba(99, 179, 237, 0.12);
+    --border2: rgba(99, 179, 237, 0.06);
+    --accent: #63b3ed;
+    --accent2: #f6ad55;
+    --gold: #f6e05e;
+    --green: #68d391;
+    --red: #fc8181;
+    --purple: #b794f4;
+    --text: #e2e8f0;
+    --muted: #718096;
+    --muted2: #4a5568;
+    --glow: rgba(99, 179, 237, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+    min-height: 100vh;
+  }
+
+  /* Cursor */
+  .cursor { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transition: transform 0.1s; mix-blend-mode: screen; }
+  .cursor-ring { width: 36px; height: 36px; border: 1px solid rgba(99,179,237,0.4); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transition: all 0.18s ease; }
+
+  /* BG effects */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .blob { position: fixed; border-radius: 50%; filter: blur(140px); pointer-events: none; z-index: 0; animation: float 14s ease-in-out infinite; }
+  .blob-1 { width: 600px; height: 600px; background: rgba(99,179,237,0.06); top: -200px; right: -100px; }
+  .blob-2 { width: 400px; height: 400px; background: rgba(183,148,244,0.05); bottom: 0; left: -100px; animation-delay: -7s; }
+
+  @keyframes float { 0%,100%{transform:translate(0,0);} 50%{transform:translate(20px,-25px);} }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 60px;
+    background: rgba(5,8,16,0.75);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; text-decoration: none; color: var(--text); }
+  .logo-icon { width: 34px; height: 34px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--bg); }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-links a.active { color: var(--accent); }
+  .nav-right { display: flex; gap: 12px; align-items: center; }
+  .nav-user { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--bg); }
+
+  /* PAGE HEADER */
+  .page-header {
+    position: relative; z-index: 1;
+    padding: 140px 60px 60px;
+  }
+  .breadcrumb {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted2);
+    letter-spacing: 0.08em;
+    margin-bottom: 24px;
+  }
+  .breadcrumb span { color: var(--accent); }
+
+  .page-title {
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 16px;
+    animation: fadeUp 0.7s ease both;
+  }
+  .page-title em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .page-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 480px;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+
+  /* FILTERS */
+  .filters-bar {
+    position: relative; z-index: 1;
+    padding: 0 60px 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.7s ease 0.15s both;
+  }
+
+  .filter-group { display: flex; gap: 6px; }
+
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .filter-btn:hover { border-color: rgba(99,179,237,0.35); color: var(--text); }
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .filter-sep { width: 1px; height: 32px; background: var(--border); margin: 0 6px; }
+
+  .sort-select {
+    margin-left: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23718096' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  /* FEATURED TEST */
+  .featured-section {
+    position: relative; z-index: 1;
+    padding: 0 60px 60px;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  .featured-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .featured-label::before { content: ''; display: inline-block; width: 20px; height: 1px; background: var(--accent2); }
+
+  .featured-card {
+    background: linear-gradient(135deg, rgba(99,179,237,0.08) 0%, rgba(183,148,244,0.06) 50%, rgba(246,173,85,0.05) 100%);
+    border: 1px solid rgba(99,179,237,0.2);
+    border-radius: 20px;
+    padding: 52px 56px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .featured-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--purple), var(--accent2));
+  }
+  .featured-card:hover { transform: translateY(-3px); box-shadow: 0 30px 80px rgba(0,0,0,0.4), 0 0 60px rgba(99,179,237,0.08); }
+
+  .featured-bg-num {
+    position: absolute;
+    right: 56px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 14rem;
+    font-weight: 800;
+    color: rgba(99,179,237,0.03);
+    font-family: 'DM Mono', monospace;
+    pointer-events: none;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  .featured-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(246,173,85,0.1);
+    border: 1px solid rgba(246,173,85,0.2);
+    color: var(--accent2);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .featured-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
+  .featured-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.7; max-width: 520px; margin-bottom: 28px; }
+
+  .featured-meta {
+    display: flex; gap: 24px; align-items: center;
+  }
+  .meta-item {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .meta-dot { width: 4px; height: 4px; border-radius: 50%; }
+
+  .featured-actions { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; position: relative; z-index: 1; }
+
+  .btn-start {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 16px 36px;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(99,179,237,0.35); }
+
+  .featured-stats {
+    display: flex; gap: 20px;
+  }
+  .fstat { text-align: center; }
+  .fstat-num { font-size: 1.4rem; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--accent); }
+  .fstat-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* TESTS GRID */
+  .tests-section {
+    position: relative; z-index: 1;
+    padding: 0 60px 100px;
+  }
+
+  .tests-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .test-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 32px 28px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: fadeUp 0.6s ease both;
+  }
+  .test-card:hover {
+    border-color: rgba(99,179,237,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    background: var(--surface2);
+  }
+
+  .tc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+
+  .tc-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .tc-difficulty {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    border: 1px solid;
+  }
+  .diff-easy { color: var(--green); border-color: rgba(104,211,145,0.25); background: rgba(104,211,145,0.06); }
+  .diff-medium { color: var(--accent2); border-color: rgba(246,173,85,0.25); background: rgba(246,173,85,0.06); }
+  .diff-hard { color: var(--red); border-color: rgba(252,129,129,0.25); background: rgba(252,129,129,0.06); }
+  .diff-expert { color: var(--purple); border-color: rgba(183,148,244,0.25); background: rgba(183,148,244,0.06); }
+
+  .tc-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .tc-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.65; flex: 1; margin-bottom: 24px; }
+
+  .tc-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted2);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border2);
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .tc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid var(--border2);
+  }
+
+  .tc-meta { display: flex; gap: 14px; }
+  .tc-meta-item {
+    display: flex; align-items: center; gap: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .tc-rating { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--gold); font-family: 'DM Mono', monospace; }
+
+  .tc-cta {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tc-cta:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  /* Progress indicator on card hover */
+  .tc-progress {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 0 0 0 16px;
+  }
+  .test-card:hover .tc-progress { width: 100%; }
+
+  /* POPULAR BANNER */
+  .popular-banner {
+    position: relative; z-index: 1;
+    margin: 0 60px;
+    padding: 0 0 60px;
+  }
+  .pop-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .popular-list {
+    display: flex; gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .popular-list::-webkit-scrollbar { display: none; }
+
+  .pop-chip {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 12px 20px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .pop-chip:hover { border-color: rgba(99,179,237,0.3); background: var(--surface2); }
+  .pop-chip-icon { font-size: 1.2rem; }
+  .pop-chip-name { font-size: 0.82rem; font-weight: 600; }
+  .pop-chip-count { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+
+  /* EMPTY STATE (hidden by default) */
+  .empty-state {
+    display: none;
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.4; }
+  .empty-text { font-size: 1rem; }
+
+  /* LOAD MORE */
+  .load-more-wrap {
+    text-align: center;
+    padding: 0 60px 80px;
+    position: relative; z-index: 1;
+  }
+  .btn-load {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 14px 40px;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-load:hover { border-color: rgba(99,179,237,0.4); color: var(--text); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+
+  @media(max-width:900px){
+    nav{padding:16px 24px;}
+    .nav-links{display:none;}
+    .page-header,.filters-bar,.featured-section,.tests-section,.popular-banner,.load-more-wrap{padding-left:24px;padding-right:24px;}
+    .featured-card{grid-template-columns:1fr;padding:32px 28px;}
+    .featured-actions{align-items:flex-start;}
+    .featured-bg-num{display:none;}
+    .tests-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="../iq-platform.html" class="logo">
+    <div class="logo-icon">IQ</div>
+    Neuro<span>IQ</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="../iq-platform.html">Bosh sahifa</a></li>
+    <li><a href="#" class="active">Testlar</a></li>
+    <li><a href="./iq-results.html">Natijalar</a></li>
+    <li><a href="./iq-ilm.html">Ilm</a></li>
+    <li><a href="#">Reyting</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar">U</div>
+      <span>Foydalanuvchi</span>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="breadcrumb">neuroiq / <span>testlar</span></div>
+  <h1 class="page-title">Barcha <em>testlar</em></h1>
+  <p class="page-sub">47 ta ilmiy asosda tuzilgan test. O'zingizga mos turini tanlang va aqliy qobiliyatingizni kashf eting.</p>
+</div>
+
+<!-- POPULAR TAGS -->
+<div class="popular-banner">
+  <div class="pop-title">// eng ko'p ishlatilgan</div>
+  <div class="popular-list">
+    <div class="pop-chip"><span class="pop-chip-icon">🔥</span><span class="pop-chip-name">Klassik IQ</span><span class="pop-chip-count">124k o'tgan</span></div>
+    <div class="pop-chip"><span class="pop-chip-icon">🌀</span><span class="pop-chip-name">Mantiq</span><span class="pop-chip-count">98k o'tgan</span></div>
+    <div class="pop-chip"><span class="pop-chip-icon">💾</span><span class="pop-chip-name">Xotira</span><span class="pop-chip-count">76k o'tgan</span></div>
+    <div class="pop-chip"><span class="pop-chip-icon">🎯</span><span class="pop-chip-name">Diqqat</span><span class="pop-chip-count">54k o'tgan</span></div>
+    <div class="pop-chip"><span class="pop-chip-icon">⚡</span><span class="pop-chip-name">Tezkor</span><span class="pop-chip-count">43k o'tgan</span></div>
+    <div class="pop-chip"><span class="pop-chip-icon">🎨</span><span class="pop-chip-name">Kreativ</span><span class="pop-chip-count">38k o'tgan</span></div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <div class="filter-group">
+    <button class="filter-btn active" data-filter="all">Hammasi</button>
+    <button class="filter-btn" data-filter="iq">IQ</button>
+    <button class="filter-btn" data-filter="mantiq">Mantiq</button>
+    <button class="filter-btn" data-filter="xotira">Xotira</button>
+    <button class="filter-btn" data-filter="kreativ">Kreativ</button>
+    <button class="filter-btn" data-filter="til">Til</button>
+  </div>
+  <div class="filter-sep"></div>
+  <div class="filter-group">
+    <button class="filter-btn" data-filter="easy">Oson</button>
+    <button class="filter-btn" data-filter="medium">O'rta</button>
+    <button class="filter-btn" data-filter="hard">Qiyin</button>
+  </div>
+  <select class="sort-select">
+    <option>Mashhurlik bo'yicha</option>
+    <option>Eng yangi</option>
+    <option>Vaqt bo'yicha</option>
+    <option>Reyting bo'yicha</option>
+  </select>
+</div>
+
+<!-- FEATURED -->
+<div class="featured-section">
+  <div class="featured-label">Tavsiya etilgan test</div>
+  <div class="featured-card">
+    <div class="featured-bg-num">IQ</div>
+    <div class="featured-content">
+      <div class="featured-badge">⭐ Eng mashhur</div>
+      <h2 class="featured-title">To'liq IQ Baholash Testi</h2>
+      <p class="featured-desc">Wechsler metodologiyasiga asoslangan to'liq qamrovli test. Mantiq, xotira, fazoviy idrok va verbal qobiliyat — barchasi bir joyda. Natijangiz xalqaro standartlarga mos ravishda hisob-kitob qilinadi.</p>
+      <div class="featured-meta">
+        <div class="meta-item"><span class="meta-dot" style="background:var(--accent)"></span>60 savol</div>
+        <div class="meta-item"><span class="meta-dot" style="background:var(--green)"></span>40 daqiqa</div>
+        <div class="meta-item"><span class="meta-dot" style="background:var(--gold)"></span>Bepul</div>
+        <div class="meta-item"><span class="meta-dot" style="background:var(--purple)"></span>124,891 marta o'tilgan</div>
+      </div>
+    </div>
+    <div class="featured-actions">
+      <div class="featured-stats">
+        <div class="fstat">
+          <div class="fstat-num">4.9</div>
+          <div class="fstat-label">Reyting</div>
+        </div>
+        <div class="fstat">
+          <div class="fstat-num">98%</div>
+          <div class="fstat-label">Aniqlik</div>
+        </div>
+      </div>
+      <button class="btn-start">Boshlash →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TESTS GRID -->
+<div class="tests-section">
+  <div class="tests-grid" id="testsGrid">
+
+    <!-- Card 1 -->
+    <div class="test-card" style="animation-delay:0s" data-category="mantiq" data-diff="medium">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(99,179,237,0.1)">🌀</div>
+        <span class="tc-difficulty diff-medium">O'rta</span>
+      </div>
+      <div class="tc-title">Mantiqiy Ketma-ketlik</div>
+      <div class="tc-desc">Raqamlar va shakllar ketma-ketligidagi qonuniyatlarni toping. Analitik fikrlashingizni sinab ko'ring.</div>
+      <div class="tc-tags">
+        <span class="tag">mantiq</span>
+        <span class="tag">naqsh</span>
+        <span class="tag">analiz</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 20 daq</div>
+          <div class="tc-meta-item">📝 30 savol</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="test-card" style="animation-delay:0.05s" data-category="xotira" data-diff="easy">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(104,211,145,0.1)">💾</div>
+        <span class="tc-difficulty diff-easy">Oson</span>
+      </div>
+      <div class="tc-title">Ishchi Xotira Testi</div>
+      <div class="tc-desc">Qisqa muddatli xotira va diqqat boshqaruvini baholaydi. Ko'rsatilgan ma'lumotlarni eslab qoling.</div>
+      <div class="tc-tags">
+        <span class="tag">xotira</span>
+        <span class="tag">diqqat</span>
+        <span class="tag">konsentratsiya</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 15 daq</div>
+          <div class="tc-meta-item">📝 25 savol</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="test-card" style="animation-delay:0.1s" data-category="kreativ" data-diff="hard">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(183,148,244,0.1)">🎨</div>
+        <span class="tc-difficulty diff-hard">Qiyin</span>
+      </div>
+      <div class="tc-title">Kreativ Fikrlash</div>
+      <div class="tc-desc">Noodatiy muammolarni hal qilish va yangi g'oyalar yaratish qobiliyatingizni o'lchaydi.</div>
+      <div class="tc-tags">
+        <span class="tag">kreativlik</span>
+        <span class="tag">divergent</span>
+        <span class="tag">ijod</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 25 daq</div>
+          <div class="tc-meta-item">📝 20 vazifa</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="test-card" style="animation-delay:0.15s" data-category="til" data-diff="medium">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(246,173,85,0.1)">📚</div>
+        <span class="tc-difficulty diff-medium">O'rta</span>
+      </div>
+      <div class="tc-title">Verbal Qobiliyat</div>
+      <div class="tc-desc">So'z boyligi, analogiya va til mantiqini sinab ko'radigan keng qamrovli verbal test.</div>
+      <div class="tc-tags">
+        <span class="tag">til</span>
+        <span class="tag">leksika</span>
+        <span class="tag">analogiya</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 18 daq</div>
+          <div class="tc-meta-item">📝 35 savol</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="test-card" style="animation-delay:0.2s" data-category="iq" data-diff="hard">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(252,129,129,0.1)">🧩</div>
+        <span class="tc-difficulty diff-hard">Qiyin</span>
+      </div>
+      <div class="tc-title">Raven Matritslari</div>
+      <div class="tc-desc">Induktiv fikrlash va vizual-fazoviy qobiliyatni o'lchaydigan klassik matritsa testi.</div>
+      <div class="tc-tags">
+        <span class="tag">iq</span>
+        <span class="tag">raven</span>
+        <span class="tag">vizual</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 30 daq</div>
+          <div class="tc-meta-item">📝 36 savol</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="test-card" style="animation-delay:0.25s" data-category="iq" data-diff="easy">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(246,230,94,0.08)">⚡</div>
+        <span class="tc-difficulty diff-easy">Oson</span>
+      </div>
+      <div class="tc-title">Tezkor IQ Testi</div>
+      <div class="tc-desc">10 daqiqada taxminiy IQ ko'rsatkichingizni bilib oling. Tez va aniq natija.</div>
+      <div class="tc-tags">
+        <span class="tag">iq</span>
+        <span class="tag">tezkor</span>
+        <span class="tag">bepul</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 10 daq</div>
+          <div class="tc-meta-item">📝 20 savol</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+    <!-- Card 7 -->
+    <div class="test-card" style="animation-delay:0.3s" data-category="mantiq" data-diff="expert">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(183,148,244,0.12)">🔬</div>
+        <span class="tc-difficulty diff-expert">Ekspert</span>
+      </div>
+      <div class="tc-title">Ilg'or Deduksiya</div>
+      <div class="tc-desc">Murakkab mantiqiy zanjirlarni hal qiladigan ilg'or darajadagi deduksiya testi. Faqat kuchlilar uchun.</div>
+      <div class="tc-tags">
+        <span class="tag">deduksiya</span>
+        <span class="tag">ilg'or</span>
+        <span class="tag">murakkab</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 45 daq</div>
+          <div class="tc-meta-item">📝 40 savol</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+    <!-- Card 8 -->
+    <div class="test-card" style="animation-delay:0.35s" data-category="xotira" data-diff="medium">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(99,179,237,0.1)">🎯</div>
+        <span class="tc-difficulty diff-medium">O'rta</span>
+      </div>
+      <div class="tc-title">Diqqat va Konsentratsiya</div>
+      <div class="tc-desc">Uzluksiz diqqat va tanlangan konsentratsiya qobiliyatingizni o'lchaydigan interaktiv test.</div>
+      <div class="tc-tags">
+        <span class="tag">diqqat</span>
+        <span class="tag">fokus</span>
+        <span class="tag">xotira</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 22 daq</div>
+          <div class="tc-meta-item">📝 28 savol</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+    <!-- Card 9 -->
+    <div class="test-card" style="animation-delay:0.4s" data-category="kreativ" data-diff="medium">
+      <div class="tc-progress"></div>
+      <div class="tc-top">
+        <div class="tc-icon" style="background:rgba(246,173,85,0.1)">💡</div>
+        <span class="tc-difficulty diff-medium">O'rta</span>
+      </div>
+      <div class="tc-title">Muammo Hal Qilish</div>
+      <div class="tc-desc">Amaliy vaziyatlarni tahlil qilish va eng samarali yechim topish qobiliyatini baholaydi.</div>
+      <div class="tc-tags">
+        <span class="tag">muammo</span>
+        <span class="tag">yechim</span>
+        <span class="tag">kreativ</span>
+      </div>
+      <div class="tc-footer">
+        <div class="tc-meta">
+          <div class="tc-meta-item">⏱ 30 daq</div>
+          <div class="tc-meta-item">📝 24 savol</div>
+        </div>
+        <button class="tc-cta">Boshlash</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🔍</div>
+    <div class="empty-text">Bu kategoriyada hozircha test yo'q</div>
+  </div>
+</div>
+
+<!-- LOAD MORE -->
+<div class="load-more-wrap">
+  <button class="btn-load">Yana testlar yuklash (38 ta qoldi)</button>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => {
+    mx=e.clientX; my=e.clientY;
+    cursor.style.left=mx-4+'px'; cursor.style.top=my-4+'px';
+  });
+  (function animRing(){
+    rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+    ring.style.left=rx-18+'px'; ring.style.top=ry-18+'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.querySelectorAll('button,a,.test-card,.featured-card,.pop-chip').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ cursor.style.transform='scale(2.5)'; ring.style.transform='scale(1.4)'; ring.style.borderColor='rgba(99,179,237,0.7)'; });
+    el.addEventListener('mouseleave',()=>{ cursor.style.transform='scale(1)'; ring.style.transform='scale(1)'; ring.style.borderColor='rgba(99,179,237,0.4)'; });
+  });
+
+  // Filter logic
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.test-card');
+  const emptyState = document.getElementById('emptyState');
+  const grid = document.getElementById('testsGrid');
+  let activeFilters = { category: 'all', diff: null };
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter;
+      const isDiff = ['easy','medium','hard'].includes(f);
+      const isCat = !isDiff;
+
+      if (isCat) {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          if (!['easy','medium','hard'].includes(b.dataset.filter)) b.classList.remove('active');
+        });
+        btn.classList.add('active');
+        activeFilters.category = f;
+      } else {
+        if (btn.classList.contains('active')) {
+          btn.classList.remove('active');
+          activeFilters.diff = null;
+        } else {
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            if (['easy','medium','hard'].includes(b.dataset.filter)) b.classList.remove('active');
+          });
+          btn.classList.add('active');
+          activeFilters.diff = f;
+        }
+      }
+
+      let visible = 0;
+      cards.forEach(card => {
+        const cat = card.dataset.category;
+        const diff = card.dataset.diff;
+        const catMatch = activeFilters.category === 'all' || cat === activeFilters.category;
+        const diffMap = { easy: 'easy', medium: 'medium', hard: 'hard' };
+        const diffMatch = !activeFilters.diff || diff === activeFilters.diff;
+
+        if (catMatch && diffMatch) {
+          card.style.display = 'flex';
+          visible++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      emptyState.style.display = visible === 0 ? 'block' : 'none';
+    });
+  });
+
+  // Intersection observer for card animations
+  const cardObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(24px)';
+    card.style.transition = `opacity 0.5s ease ${i*0.06}s, transform 0.5s ease ${i*0.06}s, border-color 0.25s, background 0.25s, box-shadow 0.25s`;
+    cardObs.observe(card);
+  });
+</script>
+</body>
+</html>

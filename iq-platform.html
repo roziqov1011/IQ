@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroIQ — Aql o'lchov platformasi</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --bg2: #080d1a;
+    --surface: #0d1425;
+    --border: rgba(99, 179, 237, 0.12);
+    --accent: #63b3ed;
+    --accent2: #f6ad55;
+    --gold: #f6e05e;
+    --text: #e2e8f0;
+    --muted: #718096;
+    --glow: rgba(99, 179, 237, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(99,179,237,0.4);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.18s ease;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(99,179,237,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,179,237,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Ambient blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    animation: float 12s ease-in-out infinite;
+  }
+  .blob-1 { width: 500px; height: 500px; background: rgba(99,179,237,0.07); top: -100px; right: -100px; }
+  .blob-2 { width: 400px; height: 400px; background: rgba(246,173,85,0.05); bottom: 100px; left: -100px; animation-delay: -6s; }
+  .blob-3 { width: 300px; height: 300px; background: rgba(159,122,234,0.06); top: 40%; left: 40%; animation-delay: -3s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(30px, -30px) scale(1.05); }
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 60px;
+    background: rgba(5,8,16,0.7);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--bg);
+    font-weight: 400;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-links {
+    display: flex; gap: 36px; list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 24px var(--glow);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 40px 80px;
+    z-index: 1;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(99,179,237,0.08);
+    border: 1px solid rgba(99,179,237,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 36px;
+    animation: fadeUp 0.8s ease both;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .hero-title {
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    margin-bottom: 28px;
+    animation: fadeUp 0.8s ease 0.1s both;
+  }
+
+  .hero-title .line-2 {
+    display: block;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    max-width: 560px;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 52px;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    animation: fadeUp 0.8s ease 0.3s both;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(99,179,237,0.35);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 16px 36px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary:hover {
+    border-color: rgba(99,179,237,0.4);
+    background: rgba(99,179,237,0.05);
+  }
+
+  /* Stats strip */
+  .stats-strip {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 0 0 100px;
+    animation: fadeUp 0.8s ease 0.5s both;
+  }
+  .stat {
+    background: var(--bg);
+    padding: 40px 60px;
+    text-align: center;
+    transition: background 0.2s;
+  }
+  .stat:hover { background: var(--surface); }
+  .stat-num {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* SECTION */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 60px;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.75;
+    max-width: 500px;
+    margin-bottom: 60px;
+  }
+
+  /* Features grid */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .feature-card {
+    background: var(--bg2);
+    padding: 40px 36px;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover { background: var(--surface); }
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-icon {
+    width: 48px; height: 48px;
+    background: rgba(99,179,237,0.1);
+    border: 1px solid rgba(99,179,237,0.15);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+  }
+  .feature-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  .feature-desc {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* IQ scale visual */
+  .iq-visual-section {
+    padding: 100px 60px;
+    max-width: 1300px;
+    margin: 0 auto;
+    z-index: 1;
+    position: relative;
+  }
+
+  .iq-scale {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 200px;
+    padding: 0 0 40px;
+    position: relative;
+    margin-top: 60px;
+  }
+  .iq-scale::after {
+    content: '';
+    position: absolute;
+    bottom: 40px; left: 0; right: 0;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .iq-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  .iq-bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    position: relative;
+  }
+  .iq-bar:hover { filter: brightness(1.3); }
+
+  .iq-bar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-align: center;
+    position: absolute;
+    bottom: -30px;
+  }
+
+  .iq-bar-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-align: center;
+    position: absolute;
+    top: -22px;
+    white-space: nowrap;
+  }
+
+  /* Test categories */
+  .test-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 60px;
+  }
+
+  .test-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .test-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(99,179,237,0.08) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .test-card:hover {
+    border-color: rgba(99,179,237,0.35);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .test-card:hover::after { opacity: 1; }
+
+  .tc-emoji { font-size: 2rem; margin-bottom: 16px; display: block; }
+  .tc-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .tc-sub { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+  .tc-time {
+    margin-top: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* CTA banner */
+  .cta-banner {
+    position: relative;
+    z-index: 1;
+    margin: 0 60px 100px;
+    background: linear-gradient(135deg, rgba(99,179,237,0.1) 0%, rgba(246,173,85,0.08) 100%);
+    border: 1px solid rgba(99,179,237,0.2);
+    border-radius: 24px;
+    padding: 80px 60px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .cta-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: 50%;
+    transform: translateX(-50%);
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(99,179,237,0.15), transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-banner h2 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .cta-banner p {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 40px;
+    line-height: 1.7;
+  }
+
+  /* Footer */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 40px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-copy {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .footer-links {
+    display: flex; gap: 28px;
+    list-style: none;
+  }
+  .footer-links a {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section, .iq-visual-section { padding: 60px 24px; }
+    .stats-strip { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .test-cards { grid-template-columns: 1fr 1fr; }
+    .cta-banner { margin: 0 24px 60px; padding: 60px 32px; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">IQ</div>
+    Neuro<span>IQ</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="./pages/iq-tests.html">Testlar</a></li>
+    <li><a href="./pages/iq-results.html">Natijalar</a></li>
+    <li><a href="#">Ilm</a></li>
+    <li><a href="#">Reyting</a></li>
+  </ul>
+  <button class="nav-cta">Boshlash →</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    AQLIY IMKONIYATLARINGIZNI KASHF ETING
+  </div>
+  <h1 class="hero-title">
+    Zehnni<br>
+    <span class="line-2">o'lchang</span>
+  </h1>
+  <p class="hero-sub">
+    Ilmiy asosda ishlab chiqilgan IQ testlari orqali mantiqiy fikrlash, xotira va kreativ qobiliyatingizni aniqlang.
+  </p>
+  <div class="hero-actions">
+    <button class="btn-primary">Bepul test boshlash</button>
+    <button class="btn-secondary">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.2"/>
+        <polygon points="6.5,5.5 11.5,8 6.5,10.5" fill="currentColor"/>
+      </svg>
+      Qanday ishlaydi?
+    </button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat">
+    <div class="stat-num" data-target="2.4">0</div>
+    <div class="stat-label">Mln+ foydalanuvchi</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" data-target="47">0</div>
+    <div class="stat-label">Xil test turi</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" data-target="98">0</div>
+    <div class="stat-label">% aniqlik darajasi</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section>
+  <div class="section-tag">// imkoniyatlar</div>
+  <h2 class="section-title">Nima uchun NeuroIQ?</h2>
+  <p class="section-desc">Har bir test ilmiy metodologiyaga asoslangan va psixologlar tomonidan tekshirilgan.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-title">Klinikalik aniqlik</div>
+      <div class="feature-desc">Xalqaro standartlarga mos IQ o'lchov metodlari. Wechsler va Raven matritslari asosida.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Tezkor natija</div>
+      <div class="feature-desc">Test tugashi bilan darhol batafsil hisobot va IQ ballini oling. 15 daqiqa yetarli.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Kengaytirilgan tahlil</div>
+      <div class="feature-desc">Mantiq, xotira, fazoviy fikrlash va verbal qobiliyat bo'yicha alohida ko'rsatkichlar.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌍</div>
+      <div class="feature-title">Global taqqoslash</div>
+      <div class="feature-desc">Natijangizni yoshingiz, mamlakatingizdagi o'rtacha ko'rsatkich bilan solishtiring.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔐</div>
+      <div class="feature-title">To'liq maxfiylik</div>
+      <div class="feature-desc">Shaxsiy ma'lumotlaringiz himoyalangan. Siz xohlasangiz natijalarnigina ulashing.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📈</div>
+      <div class="feature-title">O'sish kuzatish</div>
+      <div class="feature-desc">Vaqt o'tishi bilan aqliy rivojlanishingizni kuzating va yaxshilash maslahatlarini oling.</div>
+    </div>
+  </div>
+</section>
+
+<!-- IQ DISTRIBUTION -->
+<div class="iq-visual-section">
+  <div class="section-tag">// IQ taqsimoti</div>
+  <h2 class="section-title">Aholi IQ taqsimoti</h2>
+  <p class="section-desc" style="margin-bottom:0">Siz qayerda turganingizni bilib oling. Normal taqsimot bo'yicha 68% odamning IQi 85–115 oralig'ida.</p>
+
+  <div class="iq-scale" id="iqScale"></div>
+</div>
+
+<!-- TEST TYPES -->
+<section>
+  <div class="section-tag">// test turlari</div>
+  <h2 class="section-title">Test kategoriyalari</h2>
+  <p class="section-desc">Maqsadingizga mos test tanlang va hoziroq boshlang.</p>
+
+  <div class="test-cards">
+    <div class="test-card">
+      <span class="tc-emoji">🔷</span>
+      <div class="tc-title">Klassik IQ</div>
+      <div class="tc-sub">To'liq qamrovli standart IQ baholash testi</div>
+      <div class="tc-time">⏱ 40 daqiqa · 60 savol</div>
+    </div>
+    <div class="test-card">
+      <span class="tc-emoji">🌀</span>
+      <div class="tc-title">Mantiqiy fikrlash</div>
+      <div class="tc-sub">Ketma-ketlik, analogiya va qoidalar topish</div>
+      <div class="tc-time">⏱ 20 daqiqa · 30 savol</div>
+    </div>
+    <div class="test-card">
+      <span class="tc-emoji">💾</span>
+      <div class="tc-title">Ishchi xotira</div>
+      <div class="tc-sub">Qisqa muddatli xotira va diqqat boshqaruvi</div>
+      <div class="tc-time">⏱ 15 daqiqa · 25 savol</div>
+    </div>
+    <div class="test-card">
+      <span class="tc-emoji">🎨</span>
+      <div class="tc-title">Kreativ aql</div>
+      <div class="tc-sub">Noodatiy muammolarni ijodiy hal qilish</div>
+      <div class="tc-time">⏱ 25 daqiqa · 20 vazifa</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-banner">
+  <h2>Tayyor emissizmi?</h2>
+  <p>Hozir boshlang — ro'yxatdan o'tish shart emas.<br>Bepul va 15 daqiqada natija.</p>
+  <button class="btn-primary" style="font-size:1rem; padding: 18px 52px;">
+    Testni boshlash →
+  </button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2025 NeuroIQ. Barcha huquqlar himoyalangan.</div>
+  <ul class="footer-links">
+    <li><a href="#">Maxfiylik</a></li>
+    <li><a href="#">Shartlar</a></li>
+    <li><a href="#">Bog'lanish</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 4 + 'px';
+    cursor.style.top = my - 4 + 'px';
+  });
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx - 18 + 'px';
+    ring.style.top = ry - 18 + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+  document.querySelectorAll('button, a, .feature-card, .test-card').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'scale(2.5)';
+      ring.style.transform = 'scale(1.4)';
+      ring.style.borderColor = 'rgba(99,179,237,0.7)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'scale(1)';
+      ring.style.transform = 'scale(1)';
+      ring.style.borderColor = 'rgba(99,179,237,0.4)';
+    });
+  });
+
+  // Counter animation
+  function animateCounter(el, target, suffix='', decimals=0) {
+    let start = 0, dur = 1800;
+    let startTime = null;
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      let progress = Math.min((ts - startTime) / dur, 1);
+      let ease = 1 - Math.pow(1 - progress, 3);
+      let val = (ease * target).toFixed(decimals);
+      el.textContent = val + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const t = parseFloat(el.dataset.target);
+        const suffix = el.dataset.target.includes('.') ? 'M+' : el.dataset.target === '98' ? '%' : '+';
+        const dec = el.dataset.target.includes('.') ? 1 : 0;
+        animateCounter(el, t, suffix, dec);
+        obs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-num').forEach(el => obs.observe(el));
+
+  // IQ distribution bars
+  const data = [
+    { label: '55–69', pct: 2.2, color: '#fc8181' },
+    { label: '70–79', pct: 6.7, color: '#fbb6ce' },
+    { label: '80–89', pct: 16.1, color: '#90cdf4' },
+    { label: '90–99', pct: 25.0, color: '#63b3ed' },
+    { label: '100–109', pct: 25.0, color: '#4299e1', highlight: true },
+    { label: '110–119', pct: 16.1, color: '#63b3ed' },
+    { label: '120–129', pct: 6.7, color: '#90cdf4' },
+    { label: '130+', pct: 2.2, color: '#f6ad55' },
+  ];
+
+  const scale = document.getElementById('iqScale');
+  const maxPct = 25;
+
+  data.forEach(d => {
+    const wrap = document.createElement('div');
+    wrap.className = 'iq-bar-wrap';
+    const barH = Math.round((d.pct / maxPct) * 150);
+
+    const pctEl = document.createElement('div');
+    pctEl.className = 'iq-bar-pct';
+    pctEl.textContent = d.pct + '%';
+
+    const bar = document.createElement('div');
+    bar.className = 'iq-bar';
+    bar.style.height = '0px';
+    bar.style.background = d.highlight
+      ? `linear-gradient(180deg, ${d.color} 0%, rgba(99,179,237,0.4) 100%)`
+      : d.color;
+    bar.style.opacity = d.highlight ? '1' : '0.6';
+    if (d.highlight) bar.style.boxShadow = `0 0 20px rgba(99,179,237,0.4)`;
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'iq-bar-label';
+    labelEl.textContent = d.label;
+
+    wrap.appendChild(pctEl);
+    wrap.appendChild(bar);
+    wrap.appendChild(labelEl);
+    scale.appendChild(wrap);
+
+    setTimeout(() => {
+      bar.style.height = barH + 'px';
+    }, 300 + data.indexOf(d) * 80);
+  });
+</script>
+</body>
+</html>
